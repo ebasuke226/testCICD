@@ -1,13 +1,14 @@
-FROM python:3.11
+FROM python:3.11-slim
 
 # 作業ディレクトリを /app に変更
 WORKDIR /app
 
 # 必要なライブラリをインストール
-RUN apt-get update --allow-unauthenticated || true && \
+RUN apt-get install -y gnupg ca-certificates && \
+    apt-get update --allow-unauthenticated || true && \
     apt-get install -y --no-install-recommends --allow-unauthenticated \
         gcc \
-        python3-dev \
+        python3.11-dev \
         libpq-dev \
         git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
