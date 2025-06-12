@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8001"
+    volumes:
+      - chroma_data:/app/data
+    networks:
+      - mlops_network
+
+  mlflow-tracking:
+    image: ghcr.io/mlflow/mlflow:latest
+    ports:
+      - "5003:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    networks:
+      - mlops_network
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mlops_network
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mlops
+      MYSQL_USER: mlops
+      MYSQL_PASSWORD: mlops
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mlops_network
+
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./shared:/shared
+      - jupyter_data:/home/jovyan/work
+      - jupyter_config:/home/jovyan/.jupyter
+      - jupyter_local:/home/jovyan/.local
+    user: root
+    networks:
+      - mlops_network
+    environment:
+      - JUPYTER_TOKEN=mlops
+      - JUPYTER_ENABLE_LAB=yes
+    shm_size: '4gb'
+    mem_limit: 4g
+    mem_reservation: 2g
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: docker/streamlit.Dockerfile
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./shared:/shared
+    networks:
+      - mlops_network
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: docker/fastapi.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./shared:/shared
+    networks:
+      - mlops_network
+
+networks:
+  mlops_network:
+    driver: bridge
+
+volumes:
+  chroma_data:
+  mlflow_data:
+  postgres_data:
+  mysql_data:
+  jupyter_data:
+  jupyter_config:
+  jupyter_local:
