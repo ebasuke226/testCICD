@@ -4,14 +4,14 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 必要なライブラリをインストール
-RUN apt-get install -y gnupg ca-certificates && \
-    apt-get update --allow-unauthenticated || true && \
-    apt-get install -y --no-install-recommends --allow-unauthenticated \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
         gcc \
-        python3.11-dev \
+        python3-dev \
         libpq-dev \
         git \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # 環境変数を設定（FastAPI の app モジュールを認識させる）
 ENV PYTHONPATH=/app
