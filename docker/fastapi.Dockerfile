@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.9-slim
 
 # 作業ディレクトリを /app に変更
 WORKDIR /app
@@ -18,7 +18,7 @@ ENV PYTHONPATH=/app
 
 # 依存関係をインストール
 COPY requirements/fastapi.txt /tmp/
-RUN pip install --no-cache-dir --use-deprecated=legacy-resolver --timeout 1000 -r /tmp/fastapi.txt --no-deps && \
+RUN pip install --no-cache-dir --use-deprecated=legacy-resolver --timeout 1000 -r /tmp/fastapi.txt && \
     pip install --no-cache-dir --timeout 1000 \
         frozendict \
         peewee \
