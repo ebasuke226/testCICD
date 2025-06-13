@@ -1,6 +1,33 @@
 version: '3.8'
 
 services:
+  # MCP Server (Sidecar)
+  mcp-everything:
+    image: mcp/everything:latest
+    container_name: ${COMPOSE_PROJECT_NAME}-mcp-server
+    ports:
+      - "8002:8000"
+    networks:
+      - mlops-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M    # コンテナあたり最大512MBまで
+          cpus: '0.5'     # 0.5CPUまで利用可
+        reservations:
+          memory: 256M    # 起動保証は256MB
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   # PostgreSQL
   postgres:
     image: postgres:13
@@ -8,7 +35,7 @@ services:
     environment:
       POSTGRES_USER: mlflow
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: mlflow_db
+      POSTGRES_DB: mlflow
     ports:
       - "5433:5432"
     volumes:
@@ -51,7 +78,7 @@ services:
     environment:
       POSTGRES_USER: mlflow
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      BACKEND_STORE_URI: postgresql://mlflow:${POSTGRES_PASSWORD}/@postgres/mlflow_db
+      BACKEND_STORE_URI: postgresql://mlflow:${POSTGRES_PASSWORD}/@postgres/mlflow
       ARTIFACT_ROOT: /app/mlflow-tracking/artifacts
       MLFLOW_TRACKING_URI: http://mlflow-tracking:5003
       MLFLOW_ARTIFACT_URI: models:/Stock_Chart_Classification_Model/Production
@@ -90,6 +117,14 @@ services:
       GOOGLE_DRIVE_FOLDER_ID: ${GOOGLE_DRIVE_FOLDER_ID}
       CHROMA_DB_HOST: chromadb
       CHROMA_DB_PORT: 8001
+      MCP_SERVER_URL: http://mcp-everything:8000
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+        reservations:
+          memory: 512M
     volumes:
       - ./fastapi/app:/app/app
       - ./mlflow-tracking/artifacts:/app/mlflow-tracking/artifacts
@@ -100,7 +135,14 @@ services:
       - mlflow-tracking
       - postgres
       - mysql
+      - mcp-everything
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--app-dir", "/app"]
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Streamlit
   streamlit:

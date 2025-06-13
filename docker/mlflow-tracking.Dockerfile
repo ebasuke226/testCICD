@@ -19,7 +19,8 @@ RUN conda create -n mlflow_jupyter_env python=3.11 jupyterlab scikit-learn panda
 
 # MLflowを conda 環境にインストール
 RUN conda run -n mlflow_jupyter_env pip install mlflow psycopg2-binary gunicorn && \
-    echo 'source activate mlflow_jupyter_env' >> ~/.bashrc && \
+    echo 'eval "$(conda shell.bash hook)"' >> ~/.bashrc && \
+    echo 'conda activate mlflow_jupyter_env' >> ~/.bashrc && \
     echo 'export PATH=$CONDA_PREFIX/bin:$PATH' >> ~/.bashrc
 
 # 作業ディレクトリを設定

@@ -1,5 +1,4 @@
 import logging
-from app.agents.short_term_analysis import run_short_term_analysis
 from app.agents.short_term_analysis_v3 import run_short_term_analysis_v3
 from fastapi import FastAPI, Request, Query
 from pydantic import BaseModel  # PydanticのBaseModelをインポート
