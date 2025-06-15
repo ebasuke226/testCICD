@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:  # PR作成・更新時にもCIを走らせる
-    branches: [main]
+    branches: ["*"]  # ← 全ブランチでpush時に動く
   push:  # 通常のpush時にもCIを走らせる
     branches: [feature/*]  # または ["*"] で全ブランチ
 
