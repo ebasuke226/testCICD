@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  pull_request:  # PR作成・更新時にもCIを走らせる
+    branches: ["*"]  # ← 全ブランチでpush時に動く
+  push:  # 通常のpush時にもCIを走らせる
+    branches: [feature/*]  # または ["*"] で全ブランチ
 
 jobs:
   build:

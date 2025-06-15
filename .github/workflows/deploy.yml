@@ -1,7 +1,8 @@
 name: Deploy to Production
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]  # mainにマージされた時点で自動発火
 
 jobs:
   deploy:
